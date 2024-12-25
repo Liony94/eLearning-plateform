@@ -12,14 +12,19 @@ export class SubjectController {
     return this.subjectService.findAll();
   }
 
-  @Get(':id')
-  findOneById(@Param('id') id: string): InterfaceSubject {
-    return this.subjectService.findOneByID(+id);
+  @Get('favorite')
+  findFavorite(): string {
+    return this.subjectService.findFavoriteSubject();
   }
 
   @Get(':name/level')
   findLevelAndSubject(@Param('name') name: string): LevelSubjectInterface[] {
     return this.subjectService.findLevelAndSubjectFromName(name);
+  }
+
+  @Get(':id')
+  findOneById(@Param('id') id: string): InterfaceSubject {
+    return this.subjectService.findOneByID(+id);
   }
 
   @Post()

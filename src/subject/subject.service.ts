@@ -1,16 +1,19 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InterfacePostSubject, InterfaceSubject } from './subject';
 import { BddService } from 'src/bdd/bdd.service';
-import { LevelSubjectInterface } from 'src/level/level';
-import { LevelService } from 'src/level/level.service';
+import { LevelInterface, LevelSubjectInterface } from 'src/level/level';
+import { TOKEN_LEVELS } from 'src/bdd/constante';
+import { ConfigService } from './../config/config.service';
 
 @Injectable()
 export class SubjectService {
   constructor(
     private bdd: BddService,
-    @Inject(forwardRef(() => LevelService))
-    private levelService: LevelService,
-  ) {}
+    @Inject(TOKEN_LEVELS) private bddLevels: LevelInterface[],
+    private configService: ConfigService,
+  ) {
+    console.log('SubjectService construit avec configService:', configService);
+  }
 
   findAll(): InterfaceSubject[] {
     return this.bdd.get<InterfaceSubject>('subjects');
@@ -22,7 +25,7 @@ export class SubjectService {
 
   findLevelAndSubjectFromName(name: string): LevelSubjectInterface[] {
     const subject = this.findAll().find((s) => s.name === name);
-    const levels = this.levelService.findAll();
+    const levels = this.bddLevels;
     const filteredLevel = levels
       .filter((l) => l.id === subject.levelId)
       .map((level) => ({
@@ -31,6 +34,19 @@ export class SubjectService {
       }));
 
     return filteredLevel;
+  }
+
+  findFavoriteSubject(): string {
+    console.log('findFavoriteSubject appelé');
+    console.log('configService:', this.configService);
+    try {
+      const result = this.configService.get('FAVORITE_SUBJECT');
+      console.log('Valeur de FAVORITE_SUBJECT:', result);
+      return result;
+    } catch (error) {
+      console.error('Erreur dans findFavoriteSubject:', error);
+      throw error;
+    }
   }
 
   createNewSubject({ name }: InterfacePostSubject): InterfaceSubject[] {
